@@ -19,22 +19,6 @@ void init (){
     // Configure the system clock to 48MHz
     EPL_SystemClock_Config();
 
-    
-    // Enable clock for GPIOC and ADC
-    RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
-    RCC->APB2ENR |= RCC_APB2ENR_ADCEN;
-
-    // Set PC0 as analog
-    GPIOC->MODER |= GPIO_MODER_MODER0;
-
-    // Enable ADC
-    ADC1->CR |= ADC_CR_ADEN;
-    while(!(ADC1->ISR & ADC_ISR_ADRDY));
-
-    // Select channel 10
-    ADC1->CHSELR = ADC_CHSELR_CHSEL10;
-
-
     // Enable peripheral  GPIOA clock
     RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
     // Enable peripheral  USART2 clock
@@ -73,105 +57,64 @@ int _write( int handle, char* data, int size ) {
     return size;
 }
 
-int putint32(int32_t num) {
-    // Schleife über die Bytes des 32-Bit-Ganzzahls
-    for (int i = 0; i < 4; ++i) {
-        // Byte extrahieren und übertragen
-        int8_t byte = (num >> (i * 8)) & 0xFF;
-        while (!(USART2->ISR & USART_ISR_TXE)); // warten bis zur Übertragungsmöglichkeit
-        USART2->TDR = byte; // Byte übertragen
-    }
-    return num;
-    }
+void build_grid (uint8_t *grid_player){
+    //spielfeld erstellen static
+    //zeile 0
+    grid_player [0*10+0]=2;
+    grid_player [0*10+1]=2;
+    grid_player [0*10+4]=2;
+    grid_player [0*10+5]=2;
+    grid_player [0*10+7]=2;
+    grid_player [0*10+8]=2;
+    //zeile2
+    grid_player [2*10+5]=3;
+    grid_player [2*10+6]=3;
+    grid_player [2*10+7]=3;
+    //zeile 3
+    grid_player [3*10+0]=3;
+    grid_player [3*10+1]=3;
+    grid_player [3*10+2]=3;
+    //Zeile 4
+    grid_player [4*10+5]=3;
+    grid_player [4*10+6]=3;
+    grid_player [4*10+7]=3;
+    //zeile 5
+    grid_player [5*10+0]=4;
+    grid_player [5*10+1]=4;
+    grid_player [5*10+2]=4;
+    grid_player [5*10+3]=4;
+    //zeile 6
+    grid_player [6*10+6]=4;
+    grid_player [6*10+7]=4;
+    grid_player [6*10+8]=4;
+    grid_player [6*10+9]=4;
+    //ziele 8
+    grid_player [8*10+5]=5;
+    grid_player [8*10+6]=5;
+    grid_player [8*10+7]=5;
+    grid_player [8*10+8]=5;
+    grid_player [8*10+9]=5;
+    //zeile 9
+    grid_player [9*10+1]=2;
+    grid_player [9*10+2]=2;
+}
 
- int putint32s(const int32_t *nums, int count) {
-    // Schleife über die 32-Bit-Ganzzahlen
-    for (int i = 0; i < count; ++i) {
-        putint32(nums[i]); // 32-Bit-Ganzzahl senden
-    }
-    return count;
-    }
+int grid_checksum (){
 
+}
 
-  void RGBControl (uint8_t *rxb){
-    
-            // Print the data to the console using the LOG macro which is defined above and calls printf which uses _write, which is overriden to redirect the output to UART
-            //LOG("[DEBUG-LOG]: %d\r\n", *rxb );
-            //LOG("%d\r\n",rxb)
-            //USART2->TDR = 1;
+void pewpew (){
 
-
-            if (*rxb==114) {               //R key
-              GPIOA->ODR &= ~GPIO_ODR_9; //LED an
-              GPIOA->ODR  |= GPIO_ODR_1|GPIO_ODR_0; //LED aus
-
-            }
-            else if (*rxb==98)  {          //B key
-              GPIOA->ODR &= ~GPIO_ODR_0; //LED an
-              GPIOA->ODR  |= GPIO_ODR_9|GPIO_ODR_1; //LED aus
-            }
-            else if (*rxb==103) {          //G key
-              GPIOA->ODR &= ~GPIO_ODR_1; //LED an
-              GPIOA->ODR  |= GPIO_ODR_9|GPIO_ODR_0; //LED aus
-            }
-            else {
-              GPIOA->ODR  |= GPIO_ODR_9|GPIO_ODR_1|GPIO_ODR_0; //alle LEDs aus
-            }
-
-  }
-
-  void ADCReadout (int *adcTemp){ 
-      
-          // Start ADC conversion
-        ADC1->CR |= ADC_CR_ADSTART;
-
-        // Wait for end of conversion
-        while(!(ADC1->ISR & ADC_ISR_EOC));
-
-        // Read ADC value
-        uint32_t adcValue = ADC1->DR;       
-
-        if (*adcTemp != adcValue) {
-        *adcTemp=adcValue;
-        // Print ADC value
-        LOG("ADC value: %d\r\n", *adcTemp);
-
-        }
-        
-       
-
-  }
-
+}
 
 int main(void){
     init();
 
   uint8_t rxb;
   static uint8_t state = 0;
-  int adcTemp = 0;
-  //bool newinput = false;
+  uint8_t grid_player [100];
+  uint8_t grid_opponent [9][9];
 
-  while(1){
-    if(USART2->ISR & USART_ISR_RXNE){
-      rxb = USART2->RDR;
-      LOG("[DEBUG-LOG]: %d\r\n", rxb );
-    }
-    if (rxb == 49) {
-      state = 1;
-    }
-    if (rxb == 50) {
-      state = 2;
-    }
-
-    if (state == 1){
-      RGBControl(&rxb);
-    }
-
-    if (state ==2){
-      ADCReadout(&adcTemp);
-    }
-
-  }
 
    
     
