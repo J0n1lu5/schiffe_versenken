@@ -57,8 +57,16 @@ void generate_grid(uint8_t *grid_player) {
     srand(time(NULL));
 
     for (uint8_t length = 2; length <= 5; length++) {
-        for (uint8_t i = 0; i < length; i++) {
+        uint8_t ammount;
+
+           if (length==2) ammount=  4;
+           if (length==3) ammount=  3;
+           if (length==4) ammount=  2;
+           if (length==5) ammount=  1;
+
+        for (uint8_t i = 0; i < ammount; i++) {
             place_ship(grid_player, length);
+            print_grid(grid_player);
         }
     }
 }
@@ -68,6 +76,7 @@ void place_ship(uint8_t *grid_player, uint8_t length) {
     uint8_t retry_counter = 0;
 
     while (!placed && retry_counter < MAX_RETRIES) {
+        //printf("%d\n",retry_counter);
         uint8_t x = rand() % FIELD_SZ;
         uint8_t y = rand() % FIELD_SZ;
         bool vertical = rand() % 2 == 0;
@@ -108,6 +117,24 @@ bool is_valid_position(uint8_t *grid_player, uint8_t x, uint8_t y, uint8_t lengt
             }
         }
     }
+
+    
+    uint8_t distance = 1; // Mindestabstand zwischen Schiffen
+    for (int8_t dx = -distance; dx <= distance; dx++) {
+        for (int8_t dy = -distance; dy <= distance; dy++) {
+            uint8_t check_x = x + dx;
+            uint8_t check_y = y + dy;
+
+           
+            if (check_x >= 0 && check_x < FIELD_SZ && check_y >= 0 && check_y < FIELD_SZ) {
+                
+                if (grid_player[check_y * FIELD_SZ + check_x] != 0) {
+                    return false; 
+                }
+            }
+        }
+    }
+
     return true;
 }
 

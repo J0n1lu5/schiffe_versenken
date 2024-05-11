@@ -63,28 +63,30 @@ int _write( int handle, char* data, int size ) {
 }
 
 
-void pewpew (uint8_t x,uint8_t y){
-    printf("BOOM%d%d\n",x,y);
-}
+
 
 int main(void){
     init();
 
     uint8_t rxb;
     static uint8_t state = 0;
-    uint8_t grid_player [10*10];
+    uint8_t grid_player [10*10] = {0};
     uint8_t grid_opponent [10*10];
 
     printf("generating grid\r\n");
 
-    generate_grid(&grid_player);
+    pewpew(1,2);
+
+    //build_grid_stupid(&grid_player);
     
+    generate_grid(&grid_player);
+
     printf("generated new grid\r\n");
 
     printf("Spielfeld:\n");
     print_grid(grid_player);
    
-    pewpew(1,2);
+    
   
 
    
