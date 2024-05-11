@@ -1,6 +1,7 @@
 #include <stm32f0xx.h>
 #include "mci_clock.h"
 #include <stdio.h>
+#include <string.h>
 
 #define DEBUG
 
@@ -99,22 +100,33 @@ void build_grid (uint8_t *grid_player){
     grid_player [9*10+2]=2;
 }
 
-int grid_checksum (){
-
+uint8_t grid_checksum (uint8_t *grid_player){
+    u_int8_t checksum [9];
+    for (int x=0;x<9;x++){
+        for (int y=0; y<9;y++){
+            if (grid_player [y*10+x]!=0){
+                checksum[x]=checksum[x]+1;
+            }
+        }
+    }
+    return checksum;
 }
 
-void pewpew (){
-
+void pewpew (uint8_t x,uint8_t y){
+    printf("BOOM%d%d\n",x,y);
 }
 
 int main(void){
     init();
 
-  uint8_t rxb;
-  static uint8_t state = 0;
-  uint8_t grid_player [100];
-  uint8_t grid_opponent [9][9];
+    uint8_t rxb;
+    static uint8_t state = 0;
+    uint8_t grid_player [100];
+    uint8_t grid_opponent [100];
 
+   
+    pewpew(1,2);
+  
 
    
     
