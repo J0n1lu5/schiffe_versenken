@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <string.h>
 
+
+#include "grid.h"
+#include "attack.h"
+
 #define DEBUG
 
 // This is a simple macro to print debug messages of DEBUG is defined
@@ -58,59 +62,6 @@ int _write( int handle, char* data, int size ) {
     return size;
 }
 
-void build_grid (uint8_t *grid_player){
-    //spielfeld erstellen static
-    //zeile 0
-    grid_player [0*10+0]=2;
-    grid_player [0*10+1]=2;
-    grid_player [0*10+4]=2;
-    grid_player [0*10+5]=2;
-    grid_player [0*10+7]=2;
-    grid_player [0*10+8]=2;
-    //zeile2
-    grid_player [2*10+5]=3;
-    grid_player [2*10+6]=3;
-    grid_player [2*10+7]=3;
-    //zeile 3
-    grid_player [3*10+0]=3;
-    grid_player [3*10+1]=3;
-    grid_player [3*10+2]=3;
-    //Zeile 4
-    grid_player [4*10+5]=3;
-    grid_player [4*10+6]=3;
-    grid_player [4*10+7]=3;
-    //zeile 5
-    grid_player [5*10+0]=4;
-    grid_player [5*10+1]=4;
-    grid_player [5*10+2]=4;
-    grid_player [5*10+3]=4;
-    //zeile 6
-    grid_player [6*10+6]=4;
-    grid_player [6*10+7]=4;
-    grid_player [6*10+8]=4;
-    grid_player [6*10+9]=4;
-    //ziele 8
-    grid_player [8*10+5]=5;
-    grid_player [8*10+6]=5;
-    grid_player [8*10+7]=5;
-    grid_player [8*10+8]=5;
-    grid_player [8*10+9]=5;
-    //zeile 9
-    grid_player [9*10+1]=2;
-    grid_player [9*10+2]=2;
-}
-
-uint8_t grid_checksum (uint8_t *grid_player){
-    u_int8_t checksum [9];
-    for (int x=0;x<9;x++){
-        for (int y=0; y<9;y++){
-            if (grid_player [y*10+x]!=0){
-                checksum[x]=checksum[x]+1;
-            }
-        }
-    }
-    return checksum;
-}
 
 void pewpew (uint8_t x,uint8_t y){
     printf("BOOM%d%d\n",x,y);
@@ -121,9 +72,17 @@ int main(void){
 
     uint8_t rxb;
     static uint8_t state = 0;
-    uint8_t grid_player [100];
-    uint8_t grid_opponent [100];
+    uint8_t grid_player [10*10];
+    uint8_t grid_opponent [10*10];
 
+    printf("generating grid\r\n");
+
+    generate_grid(&grid_player);
+    
+    printf("generated new grid\r\n");
+
+    printf("Spielfeld:\n");
+    print_grid(grid_player);
    
     pewpew(1,2);
   
