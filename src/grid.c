@@ -128,6 +128,7 @@ bool is_valid_position (uint8_t *grid_player,uint8_t x, uint8_t y,uint8_t length
     }
 
     //ship to close to sides
+    //mit ==0 probieren anstelle von >=oder <= !!!!!!! weil irgendwoo in dem teiil scheiße ist
     if (vertical){
         if (y-1>=0){
             for (uint8_t i=0;i<length+2;i++){
@@ -176,20 +177,21 @@ bool is_valid_position (uint8_t *grid_player,uint8_t x, uint8_t y,uint8_t length
 
     //ships to close on ends
     if (vertical){
-        if (y<=FIELD_SZ){
-            if (grid_player[y+1*FIELD_SZ+x]!=0) return false;
+        if (y+length!=FIELD_SZ){
+            if (grid_player[y+length+1*FIELD_SZ+x]!=0) return false;
         }
         if (y>=0){
             if (grid_player[y-1*FIELD_SZ+x]!=0) return false;
         }
     }else{
-        if (x<=FIELD_SZ){
-            if (grid_player[y*FIELD_SZ+x+1]!=0) return false;
+        if (x+length!=FIELD_SZ){
+            if (grid_player[y*FIELD_SZ+x+length+1]!=0) return false;
         }
         if (x>=0){
             if (grid_player[y*FIELD_SZ+x-1]!=0) return false;
         }
     }
+    
     return true;
 }
 
