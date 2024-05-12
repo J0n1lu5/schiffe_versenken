@@ -10,6 +10,7 @@
 #define FIELD_SZ 10
 
 
+
 void build_grid_stupid (uint8_t *grid_player){
     //spielfeld erstellen static
     //zeile 0
@@ -54,9 +55,10 @@ void build_grid_stupid (uint8_t *grid_player){
 
 
 void generate_grid(uint8_t *grid_player) {
-    srand(time(NULL));
-
-    for (uint8_t length = 2; length <= 5; length++) {
+    srand(684534);
+    uint8_t j=0;
+    for (uint8_t length = 5; length >= 2; length--) {
+        
         uint8_t ammount;
 
            if (length==2) ammount=  4;
@@ -65,22 +67,26 @@ void generate_grid(uint8_t *grid_player) {
            if (length==5) ammount=  1;
 
         for (uint8_t i = 0; i < ammount; i++) {
-            place_ship(grid_player, length);
+            printf("%d",place_ship(grid_player, length));
+            printf("\nplaced ship %d\n",j);
             print_grid(grid_player);
+            j++;
         }
     }
 }
 
-void place_ship(uint8_t *grid_player, uint8_t length) {
+uint16_t place_ship(uint8_t *grid_player, uint8_t length) {
     bool placed = false;
-    uint8_t retry_counter = 0;
+    uint16_t retry_counter = 0;
+    
 
     while (!placed && retry_counter < MAX_RETRIES) {
-        //printf("%d\n",retry_counter);
+        printf("%d\n",retry_counter);
         uint8_t x = rand() % FIELD_SZ;
         uint8_t y = rand() % FIELD_SZ;
         bool vertical = rand() % 2 == 0;
 
+        
         if (is_valid_position(grid_player, x, y, length, vertical)) {
             if (vertical) {
                 for (uint8_t i = 0; i < length; i++) {
@@ -95,48 +101,98 @@ void place_ship(uint8_t *grid_player, uint8_t length) {
         }
         retry_counter++;
     }
+return retry_counter;    
 }
 
-bool is_valid_position(uint8_t *grid_player, uint8_t x, uint8_t y, uint8_t length, bool vertical) {
-    if (vertical) {
-        if (y + length > FIELD_SZ) {
+bool is_valid_position (uint8_t *grid_player,uint8_t x, uint8_t y,uint8_t length, bool vertical){
+    //ship within bolunderies 
+    if (vertical){
+        if (y + length > FIELD_SZ){
             return false;
-        }
-        for (uint8_t i = 0; i < length; i++) {
-            if (grid_player[(y + i) * FIELD_SZ + x] != 0) {
-                return false;
-            }
-        }
-    } else {
-        if (x + length > FIELD_SZ) {
+        }  
+    }else {
+        if (x + length > FIELD_SZ){
             return false;
-        }
-        for (uint8_t i = 0; i < length; i++) {
-            if (grid_player[y * FIELD_SZ + (x + i)] != 0) {
-                return false;
-            }
         }
     }
 
-    
-    uint8_t distance = 1; // Mindestabstand zwischen Schiffen
-    for (int8_t dx = -distance; dx <= distance; dx++) {
-        for (int8_t dy = -distance; dy <= distance; dy++) {
-            uint8_t check_x = x + dx;
-            uint8_t check_y = y + dy;
+    //ship colliding with other ship
+    if (vertical){
+        for (uint8_t i = 0; i < length; i++) {
+            if (grid_player[(y+i) * FIELD_SZ + x] != 0) return false;
+        }
+    }else{
+        for (uint8_t i = 0; i < length; i++){
+            if (grid_player[y * FIELD_SZ + x+i] != 0) return false;
+        }
+    }
 
-           
-            if (check_x >= 0 && check_x < FIELD_SZ && check_y >= 0 && check_y < FIELD_SZ) {
-                
-                if (grid_player[check_y * FIELD_SZ + check_x] != 0) {
-                    return false; 
+    //ship to close to sides
+    if (vertical){
+        if (y-1>=0){
+            for (uint8_t i=0;i<length+2;i++){
+                if(i+y-1>FIELD_SZ) continue;
+                if (x+1<=FIELD_SZ){
+                    if (grid_player[((y-1)+i)*FIELD_SZ+x+1]!=0) return false;
+                }
+                if(x-1>=0){
+                    if (grid_player[((y-1)+i)*FIELD_SZ+x-1]!=0) return false;
+                }
+            }
+        }else{
+            for (uint8_t i=0;i<length+2;i++){
+                if(i+y>FIELD_SZ) continue;
+                if (x+1<=FIELD_SZ){
+                    if (grid_player[(y+i)*FIELD_SZ+x+1]!=0) return false;
+                }
+                if(x-1>=0){
+                    if (grid_player[(y+i)*FIELD_SZ+x-1]!=0) return false;
+                }
+            }
+        }
+    }else{
+        if (x-1>=0){
+            for (uint8_t i=0;i<length+2;i++){
+                if(i+x-1>FIELD_SZ) continue;
+                if (x+1<=FIELD_SZ){
+                    if (grid_player[(y+1)*FIELD_SZ+((x-1)+i)]!=0) return false;
+                }
+                if(x-1>=0){
+                    if (grid_player[(y-1)*FIELD_SZ+((x-1)+i)]!=0) return false;
+                }
+            }
+        }else{
+            for (uint8_t i=0;i<length+1;i++){
+                if(i+x>FIELD_SZ) continue;
+                if (y+1<=FIELD_SZ){
+                    if (grid_player[(y+1)*FIELD_SZ+((x-1)+i)]!=0) return false;
+                }
+                if(y-1>=0){
+                    if (grid_player[(y-i)*FIELD_SZ+((x-1)+i)]!=0) return false;
                 }
             }
         }
     }
 
+    //ships to close on ends
+    if (vertical){
+        if (y<=FIELD_SZ){
+            if (grid_player[y+1*FIELD_SZ+x]!=0) return false;
+        }
+        if (y>=0){
+            if (grid_player[y-1*FIELD_SZ+x]!=0) return false;
+        }
+    }else{
+        if (x<=FIELD_SZ){
+            if (grid_player[y*FIELD_SZ+x+1]!=0) return false;
+        }
+        if (x>=0){
+            if (grid_player[y*FIELD_SZ+x-1]!=0) return false;
+        }
+    }
     return true;
 }
+
 
 
 void print_grid(uint8_t *grid_player) {
@@ -149,9 +205,9 @@ void print_grid(uint8_t *grid_player) {
 }
 
 uint8_t grid_checksum (uint8_t *grid_player){
-    uint8_t checksum [9];
-    for (int x=0;x<9;x++){
-        for (int y=0; y<9;y++){
+    uint8_t checksum [10];
+    for (int x=0;x<10;x++){
+        for (int y=0; y<10;y++){
             if (grid_player [y*10+x]!=0){
                 checksum[x]=checksum[x]+1;
             }

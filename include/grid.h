@@ -9,7 +9,7 @@
 
 void build_grid_stupid (uint8_t *grid_player);
 void generate_grid(uint8_t *grid_player);
-void place_ship(uint8_t *grid_player, uint8_t length);
+uint16_t place_ship(uint8_t *grid_player, uint8_t length);
 bool is_valid_position(uint8_t *grid_player, uint8_t x, uint8_t y, uint8_t length, bool vertical);
 void print_grid(uint8_t *grid_player);
 
