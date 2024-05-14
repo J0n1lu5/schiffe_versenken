@@ -104,6 +104,7 @@ uint16_t place_ship(uint8_t *grid_player, uint8_t length) {
 return retry_counter;    
 }
 
+/*
 bool is_valid_position (uint8_t *grid_player,uint8_t x, uint8_t y,uint8_t length, bool vertical){
     //ship within bolunderies 
     if (vertical){
@@ -128,7 +129,7 @@ bool is_valid_position (uint8_t *grid_player,uint8_t x, uint8_t y,uint8_t length
     }
 
     //ship to close to sides
-    //mit ==0 probieren anstelle von >=oder <= !!!!!!! weil irgendwoo in dem teiil scheiße ist
+    //irgendwoo in dem teil scheiße ist
     if (vertical){
         if (y-1>=0){
             for (uint8_t i=0;i<length+2;i++){
@@ -195,7 +196,58 @@ bool is_valid_position (uint8_t *grid_player,uint8_t x, uint8_t y,uint8_t length
     return true;
 }
 
+*/
 
+bool is_valid_position(uint8_t *grid_player, uint8_t x, uint8_t y, uint8_t length, bool vertical) {
+    // Überprüfen, ob das Schiff innerhalb der Spielfeldgrenzen liegt
+    if (vertical) {
+        if (y + length > FIELD_SZ) {
+            return false; // Vertikale Platzierung überschreitet die Spielfeldgrenzen
+        }
+    } else {
+        if (x + length > FIELD_SZ) {
+            return false; // Horizontale Platzierung überschreitet die Spielfeldgrenzen
+        }
+    }
+
+    // Überprüfen, ob das Schiff mit anderen Schiffen kollidiert
+    if (vertical) {
+        for (uint8_t i = 0; i < length; i++) {
+            if (grid_player[(y + i) * FIELD_SZ + x] != 0) {
+                return false; // Kollision mit einem anderen Schiff
+            }
+        }
+    } else {
+        for (uint8_t i = 0; i < length; i++) {
+            if (grid_player[y * FIELD_SZ + (x + i)] != 0) {
+                return false; // Kollision mit einem anderen Schiff
+            }
+        }
+    }
+
+    // Überprüfen, ob das Schiff zu nah an anderen Schiffen liegt
+    if (vertical) {
+        for (int i = -1; i < length + 1; i++) {
+            if (x - 1 >= 0 && y + i >= 0 && y + i < FIELD_SZ && grid_player[(y + i) * FIELD_SZ + (x - 1)] != 0) {
+                return false; // Zu nah an der linken Seite
+            }
+            if (x + 1 < FIELD_SZ && y + i >= 0 && y + i < FIELD_SZ && grid_player[(y + i) * FIELD_SZ + (x + 1)] != 0) {
+                return false; // Zu nah an der rechten Seite
+            }
+        }
+    } else {
+        for (int i = -1; i < length + 1; i++) {
+            if (y - 1 >= 0 && x + i >= 0 && x + i < FIELD_SZ && grid_player[(y - 1) * FIELD_SZ + (x + i)] != 0) {
+                return false; // Zu nah an der oberen Seite
+            }
+            if (y + 1 < FIELD_SZ && x + i >= 0 && x + i < FIELD_SZ && grid_player[(y + 1) * FIELD_SZ + (x + i)] != 0) {
+                return false; // Zu nah an der unteren Seite
+            }
+        }
+    }
+
+    return true; // Position ist gültig
+}
 
 void print_grid(uint8_t *grid_player) {
     for (int i = 0; i < 10; i++) {

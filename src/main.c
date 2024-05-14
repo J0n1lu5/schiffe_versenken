@@ -50,7 +50,32 @@ void init (){
     
     //alle LEDs aus
     GPIOA->ODR  |= GPIO_ODR_9|GPIO_ODR_1|GPIO_ODR_0;
+
+    //blue button
+    RCC->AHBENR |= RCC_AHBENR_GPIOCEN; // Aktiviere Clock für GPIOC
+    GPIOC->MODER &= ~(3UL << (2 * 13)); // Setze Pin 13 auf Eingang
+    GPIOC->PUPDR |= 2UL << (2 * 13);
 }
+
+void receive_string(char* buffer, int max_length) {
+    int index = 0;
+    char received_char;
+    
+    // Loop until either the maximum length is reached or a termination character is received
+    while (index < max_length - 1) {
+        while (!(USART2->ISR & USART_ISR_RXNE)) {}; // Wait until data is received
+        received_char = USART2->RDR; // Read received character
+        
+        if (received_char == '\n' || received_char == '\r') {
+            break; // Termination character received, exit the loop
+        }
+        
+        buffer[index++] = received_char; // Store characxter in buffer
+    }
+    
+    buffer[index] = '\0'; // Null-terminate the string
+}
+
 
 // For supporting printf function we override the _write function to redirect the output to UART
 int _write( int handle, char* data, int size ) {
@@ -71,7 +96,10 @@ int main(void){
     uint8_t rxb;
     static uint8_t state = 0;
     uint8_t grid_player [10*10] = {0};
-    uint8_t grid_opponent [10*10];
+    uint8_t grid_opponent [10*10] = {0};
+    char received_string[102];
+    bool start_game = false;
+
 
     printf("generating grid\r\n");
 
@@ -86,9 +114,16 @@ int main(void){
     printf("Spielfeld:\n");
     print_grid(grid_player);
    
-    
+   for(;;){
+      receive_string(received_string, sizeof(received_string));
+      if (received_string[0]=='S' && received_string[1]=='T' && received_string[2]=='A' && received_string[3]=='R' && received_string[4]=='T') start_game=true;
+      if (!(GPIOC->IDR & (1UL << 13))==1) start_game=true;    //blauer button
+        }
+      if (start_game){
+        printf("Hello world");
+      }
+   } 
   
 
-   
-    
-}
+      
+
