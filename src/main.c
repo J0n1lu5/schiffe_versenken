@@ -7,6 +7,15 @@
 #include "attack.h"
 #include "game.h"
 
+#define DEBUG
+
+#ifdef DEBUG
+  #define LOG( msg... ) printf( msg );
+#else
+  #define LOG( msg... ) ;
+#endif
+
+
 
 void init (void){
     // Configure the system clock to 48MHz
@@ -57,25 +66,38 @@ int main(void){
     bool start_game = false;
 
 
-    printf("generating grid\n");
+    //printf("generating grid\n");
 
-    pewpew(1,2);
+    //pewpew(1,2);
 
-    build_grid_stupid(&grid_player);
+    
     
     //generate_grid(&grid_player);
 
-    printf("generated new grid\n");
+    //printf("generated new grid\n");
 
     //printf("Spielfeld:\n");
-    print_grid(grid_player);
+    //print_grid(grid_player);
    
+   char received_string[20]={0};
+int i=0;
    for(;;){
-      char received_string[20]={0};
-
-      USART_receiveString(&received_string,sizeof(received_string));
-
+      
+    
+      if (USART2->ISR & USART_ISR_RXNE){
+            char received_char = USART2->RDR;
+                    received_string[i] = received_char;
+                    i++;
+                    if (received_char == '\n'){
+                    LOG("%s",received_string);
+                    }
+      }
       state=check_message(received_string);
+      if(state==1){
+            build_grid_stupid(&grid_player);
+            printf("CS%d",grid_checksum(&grid_player));
+
+      }
     }
       
    } 

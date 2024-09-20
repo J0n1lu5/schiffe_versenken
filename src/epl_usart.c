@@ -51,5 +51,21 @@ void USART_receiveString(char *buffer, uint16_t maxSize) {
             break;
         }
     }
-    buffer[i] = '\0';
+    
 }
+
+void USART_receive(char* buffer,uint8_t size){
+
+    for (int i=0;i<size-1;i++){    
+                    char received_char = USART2->RDR;
+                    buffer[i] = received_char;
+                    i++;
+                    if (received_char == '\n'){
+                    LOG("%s",buffer);
+                     
+            break;
+        }
+                    
+    }
+}
+
