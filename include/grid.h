@@ -12,7 +12,8 @@ void generate_grid(uint8_t *grid_player);
 uint16_t place_ship(uint8_t *grid_player, uint8_t length);
 bool is_valid_position(uint8_t *grid_player, uint8_t x, uint8_t y, uint8_t length, bool vertical);
 void print_grid(const uint8_t *grid_player);
-void grid_checksum (const uint8_t *grid_player,char *checksum);
+void grid_checksum (const uint8_t *grid_player);
 uint8_t check_shot(const char *received_string,const uint8_t *grid_player, uint8_t *enemy_shot_map);
 void init_shotmap(const uint8_t *grid_player,uint8_t *enemy_shot_map);
+void print_SF (const uint8_t *grid_player);
 #endif

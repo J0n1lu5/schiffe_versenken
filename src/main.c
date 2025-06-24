@@ -52,9 +52,17 @@ void init() {
     USART2->BRR = (APB_FREQ / BAUDRATE);
     // Enable the UART using the CR1 register
     USART2->CR1 |= ( USART_CR1_RE | USART_CR1_TE | USART_CR1_UE );
+
+    //blue button
+    RCC->AHBENR |= RCC_AHBENR_GPIOCEN; // Aktiviere Clock für GPIOC
+    GPIOC->MODER &= ~(0b11 << 13*2); // Clear MODER for PC13
 }
 
-
+void delay(uint32_t time) {
+    for (uint32_t i = 0; i < time; i++) {
+        asm("nop");
+    }
+}
 
 
 int main(void){
@@ -65,11 +73,13 @@ init();
     uint8_t enemy_grid[10*10]={0};
     uint8_t grid_player[10*10]={0};
     uint8_t enemy_shot_map [10*10]={0};
-    char checksum[10]={'0'};
     uint8_t state =0;
     uint8_t i=0;
     uint8_t last_shot[2]={0};
     uint8_t seed=0;
+    uint8_t hits=0;
+    uint8_t player=0;
+
 
     for(;;){
         seed++;
@@ -80,50 +90,50 @@ init();
             received_string[i] = received_char;
             i++;
             if (received_char == '\n'){
-                //LOG("%s",received_string);
-                state=check_message(received_string);
-                memset(received_string, 0, sizeof(received_string));
+                state=check_message(received_string,player);
                 i=0;
-
             }
+        }else if (!(GPIOC->IDR & (1<<13))){
+            delay(1000);
+            state=1;
+            player=1;
         }
+        //checksum+spielfeld player 1
 
-
-
-        if (received_string[0]=='0') state=2;
-        //prozess start message as player 2
         if (state==1) {
-            build_grid_stupid(grid_player);
+            generate_grid(grid_player);
             init_shotmap(grid_player,enemy_shot_map);
-            //memset(checksum, '0', sizeof(checksum));
-            grid_checksum(grid_player,checksum);
+            grid_checksum(grid_player);
 
             state=0;
-            //memset(received_string, 0, sizeof(received_string));
+            memset(received_string, 0, sizeof(received_string));
         //send startmessage as player2
         }else if (state==2){
             printf("START52113578\n");
             state=0;
-            //memset(received_string, 0, sizeof(received_string));
+            memset(received_string, 0, sizeof(received_string));
         //prozess enemy shot
         }else if (state==3){
             if(check_shot(received_string,grid_player,enemy_shot_map)==1) {
                 printf("T\n");
+                hits++;
             }else {
                 printf("W\n");
             }
             //check loss
-            check_loss(enemy_shot_map);
-            if (seed==99) {
-                asm("nop");
+            if (hits>=30) {
+                print_SF(grid_player);
             }
+
             random_attack(enemy_grid,last_shot,seed);
             state=0;
             memset(received_string, 0, sizeof(received_string));
         }else if (state==4){
             if (received_string[0]=='T') {
                 enemy_grid[last_shot[1]*10+last_shot[0]]=2;
-                if (check_win(enemy_grid)==1) state=7;
+                if (check_win(enemy_grid,sizeof(enemy_grid))==1) {
+                    printf("VICT\n");
+                }
 
             }
             state=0;

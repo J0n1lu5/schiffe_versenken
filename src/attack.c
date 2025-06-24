@@ -10,8 +10,13 @@ void random_attack(uint8_t *enemy_grid,uint8_t *last_shot,uint8_t seed){
     srand(seed);
     uint8_t x = rand()%10;
     uint8_t y = rand()%10;
-    //if (shot_check(enemy_grid,x,y))
+    while(enemy_grid[y*10+x]!=0){
+        x = rand()%10;
+        y = rand()%10;
+    }
     pewpew(x,y);
+    
+    
     enemy_grid[y*10+x]=1;
     last_shot[0]=x;
     last_shot[1]=y;
@@ -20,8 +25,8 @@ void random_attack(uint8_t *enemy_grid,uint8_t *last_shot,uint8_t seed){
 uint8_t shot_check (const uint8_t *enemy_grid,uint8_t x, uint8_t y){
     //check if we shot at that coordinate already
     if(enemy_grid[y*FIELD_SZ+x]!=0) {
-        int c=1;
-        return 1;
+        asm("nop");
+        return 0;
     }
     return 0;
 }

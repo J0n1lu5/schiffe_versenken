@@ -61,19 +61,21 @@ void generate_grid(uint8_t *grid_player) {
     uint8_t j=0;
     for (uint8_t length = 5; length >= 2; length--) {
         
-        uint8_t ammount;
+        uint8_t ammount=0;
 
            if (length==2) ammount=  4;
            if (length==3) ammount=  3;
            if (length==4) ammount=  2;
            if (length==5) ammount=  1;
 
+        
         for (uint8_t i = 0; i < ammount; i++) {
-            printf("%d",place_ship(grid_player, length));
-            printf("\nplaced ship %d\n",j);
-            print_grid(grid_player);
+            place_ship(grid_player, length);
+            
+            //print_grid(grid_player);
             j++;
         }
+        
     }
 }
 
@@ -83,7 +85,7 @@ uint16_t place_ship(uint8_t *grid_player, uint8_t length) {
     
 
     while (!placed && retry_counter < MAX_RETRIES) {
-        printf("%d\n",retry_counter);
+        //printf("%d\n",retry_counter);
         uint8_t x = rand() % FIELD_SZ;
         uint8_t y = rand() % FIELD_SZ;
         bool vertical = rand() % 2 == 0;
@@ -168,25 +170,20 @@ void print_grid(const uint8_t *grid_player) {
     }
 }
 
-void grid_checksum (const uint8_t *grid_player,char *checksum){
+void grid_checksum (const uint8_t *grid_player){
     int count=0;
     printf("CS");
     for (int x=0;x<10;x++){
         for (int y=0; y<10;y++){
             if (grid_player [y*10+x]!=0){
                 count++;
-                //printf("%d",count);
             }
         }
         printf("%d",count);
         count=0;
     }
     printf("\n");
-    /*printf("CS");
-    for(int i=0;i<sizeof(checksum);i++) {
-        printf("%d",checksum[i]);
-    }
-    */
+
 }
 
 void init_shotmap(const uint8_t *grid_player,uint8_t *enemy_shot_map) {
@@ -205,5 +202,21 @@ uint8_t check_shot(const char *received_string,const uint8_t *grid_player, uint8
         return 1;
     }else {
         return 0;
+    }
+}
+
+void print_SF (const uint8_t *grid_player) {
+      char sf_message[15];
+    for (int col = 0; col < 10; ++col) {
+        sf_message[0] = 'S';
+        sf_message[1] = 'F';
+        sf_message[2] = (char)(col + '0');
+        sf_message[3] = 'D';
+        for (int row = 0; row < 10; ++row) {
+            sf_message[row + 4] = (char)(grid_player[row * FIELD_SZ + col] + '0');
+        }
+        sf_message[14] = '\n';
+        sf_message[15] = '\0';
+        printf("%s", sf_message);
     }
 }
